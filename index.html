@@ -1,228 +1,238 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Captura de Tickets – Demo</title>
-<style>
-  :root { --bg:#0f1115; --fg:#eaeef5; --muted:#a9b2c3; --accent:#6ad3ff; --ok:#30d158; --warn:#ffd60a; --err:#ff453a; }
-  html,body{height:100%}
-  body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,Segoe UI,Roboto,Arial}
-  .wrap{max-width:720px;margin:0 auto;padding:16px 20px 32px}
-  h1{font-size:1.25rem;margin:8px 0 2px}
-  p.sub{color:var(--muted);margin:0 0 16px}
-  .card{background:#151823;border:1px solid #1f2431;border-radius:12px;padding:16px;margin:12px 0}
-  label{display:block;margin:10px 0 6px;color:var(--muted)}
-  input,textarea,button,select{
-    width:100%;box-sizing:border-box;background:#0f121a;color:var(--fg);
-    border:1px solid #2a3040;border-radius:10px;padding:12px;outline:none
-  }
-  input:focus,textarea:focus,select:focus{border-color:var(--accent)}
-  textarea{min-height:72px;resize:vertical}
-  .row{display:flex;gap:12px;flex-wrap:wrap}
-  .row > *{flex:1 1 200px}
-  .preview{
-    width:100%;aspect-ratio:3/4;background:#0b0e14;border:1px dashed #2a3040;border-radius:12px;
-    display:grid;place-items:center;overflow:hidden;margin-top:8px
-  }
-  .preview img{width:100%;height:100%;object-fit:cover}
-  .hint{font-size:.9rem;color:var(--muted)}
-  .status{margin-top:12px;padding:10px;border-radius:10px;border:1px solid #283044;background:#0d1220}
-  .status.ok{border-color:#234d2e;background:#0f1a12;color:var(--ok)}
-  .status.warn{border-color:#4d4623;background:#1a170f;color:var(--warn)}
-  .status.err{border-color:#4d2323;background:#1a0f0f;color:var(--err)}
-  .actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-  .btn{background:#1b2130;border:1px solid #2a3040;border-radius:10px;padding:12px 14px;cursor:pointer}
-  .btn.primary{background:linear-gradient(180deg,#1e2a40,#162036);border-color:#2a3040}
-  .btn:disabled{opacity:.6;cursor:not-allowed}
-  .small{font-size:.85rem;color:var(--muted)}
-  footer{margin-top:18px;color:var(--muted);font-size:.85rem}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tomar y subir foto (mobile)</title>
+  <style>
+    :root{--bg:#f6f7fb;--card:#fff;--accent:#0066cc;--muted:#6b7280}
+    *{box-sizing:border-box}
+    body{font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial; background:var(--bg); margin:0; padding:20px; color:#111}
+    .container{max-width:720px;margin:0 auto}
+    header{display:flex;align-items:center;gap:12px}
+    h1{font-size:1.1rem;margin:0}
+    p.lead{margin:6px 0 18px;color:var(--muted);font-size:.95rem}
+
+    .card{background:var(--card);border-radius:12px;box-shadow:0 6px 18px rgba(20,20,40,0.06);padding:16px}
+    .file-row{display:flex;gap:8px;flex-wrap:wrap}
+    .file-row > *{flex:1 1 180px}
+
+    input[type=file]{display:block;width:100%}
+    .preview{margin-top:12px;border-radius:10px;overflow:hidden;border:1px solid #e6e9ef;background:#fafafa;display:flex;align-items:center;justify-content:center;height:320px}
+    .preview img{max-width:100%;max-height:100%;object-fit:contain}
+
+    .controls{display:flex;gap:8px;margin-top:12px}
+    button{appearance:none;border:0;background:var(--accent);color:#fff;padding:10px 14px;border-radius:10px;font-weight:600}
+    button.secondary{background:#fff;color:var(--accent);border:1px solid #dbe6f6}
+    .muted{color:var(--muted);font-size:.9rem}
+
+    progress{width:100%;height:12px;border-radius:8px;overflow:hidden}
+    .info{margin-top:10px;font-size:.9rem;color:var(--muted)}
+
+    @media(min-width:640px){h1{font-size:1.25rem}}
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Captura de Tickets</h1>
-  <p class="sub">Toma una foto, revisa la vista previa y envíala al Webhook de Make.</p>
+  <div class="container">
+    <header>
+      <h1>Tomar y subir foto (mobile)</h1>
+    </header>
+    <p class="lead">Toma una foto desde el celular (o selecciona una imagen), verás el preview y podrás enviarla a un webhook de Make (Integromat).</p>
 
-  <div class="card">
-    <div class="row">
-      <div>
-        <label for="store">Caja / Punto</label>
-        <input id="store" placeholder="Caja 01" />
+    <div class="card">
+      <div class="file-row">
+        <!-- "capture" sugiere usar la cámara en mobile -->
+        <div>
+          <label class="muted">Foto (cámara / galería)</label>
+          <input id="fileInput" type="file" accept="image/*" capture="environment" />
+        </div>
+        <div>
+          <label class="muted">Nombre (opcional)</label>
+          <input id="nameInput" type="text" placeholder="Ej: foto_entrega_01" style="width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef" />
+        </div>
       </div>
-      <div>
-        <label for="cashier">Cajero/a</label>
-        <input id="cashier" placeholder="Harvey" />
+
+      <div class="preview" id="preview">
+        <div class="muted">No hay imagen seleccionada</div>
       </div>
+
+      <div class="controls">
+        <button id="uploadBtn" disabled>Subir foto</button>
+        <button id="clearBtn" class="secondary">Limpiar</button>
+      </div>
+
+      <div class="info" id="info">Tamaño: — &middot; Tipo: —</div>
+      <div style="margin-top:10px;display:none" id="progressWrap">
+        <progress id="progress" value="0" max="100"></progress>
+      </div>
+      <div id="result" class="info" style="margin-top:8px"></div>
+
+      <div style="margin-top:12px;color:#9aa3b2;font-size:.85rem">Nota: reemplace la constante <code>WEBHOOK_URL</code> dentro del script por la URL de su webhook de Make.</div>
     </div>
-
-    <label for="ticket">Foto del ticket</label>
-    <input id="ticket" type="file" accept="image/*" capture="environment" />
-    <div class="preview" id="preview">
-      <span class="hint">La vista previa aparecerá aquí</span>
-    </div>
-
-    <label for="notes">Notas (opcional)</label>
-    <textarea id="notes" placeholder="Luz baja, ticket arrugado, etc."></textarea>
-
-    <div class="hint small">Consejo: llena el encuadre, evita sombras duras y mantén el ticket plano.</div>
-
-    <div class="actions">
-      <button id="retake" class="btn" type="button" disabled>Retomar</button>
-      <button id="send" class="btn primary" type="button" disabled>Enviar a Make</button>
-    </div>
-
-    <div id="status" class="status">Esperando captura…</div>
   </div>
 
-  <footer>
-    Este demo comprime la imagen a JPG y la envía como <strong>multipart/form-data</strong> al Webhook de Make.
-  </footer>
-</div>
-
 <script>
-/* ====== CONFIGURA AQUÍ TU WEBHOOK DE MAKE ====== */
-const WEBHOOK_URL = "https://hook.us2.make.com/v5elvrnssr8b7r5x8taniadw2nene7nn"; // ← pega aquí tu URL del módulo "Custom webhook" de Make
-/* =============================================== */
+// === CONFIG: reemplaza esto con tu webhook de Make/Integromat ===
+const WEBHOOK_URL = 'https://hook.us2.make.com/v5elvrnssr8b7r5x8taniadw2nene7nn';
+// =================================================================
 
-const el = sel => document.querySelector(sel);
-const ticketInput = el('#ticket');
-const preview = el('#preview');
-const sendBtn = el('#send');
-const retakeBtn = el('#retake');
-const statusBox = el('#status');
+const fileInput = document.getElementById('fileInput');
+const preview = document.getElementById('preview');
+const uploadBtn = document.getElementById('uploadBtn');
+const clearBtn = document.getElementById('clearBtn');
+const info = document.getElementById('info');
+const nameInput = document.getElementById('nameInput');
+const progress = document.getElementById('progress');
+const progressWrap = document.getElementById('progressWrap');
+const result = document.getElementById('result');
 
-let originalFile = null;
-let compressedBlob = null;
+let currentFile = null;
 
-/** Utilidad: leer archivo como Image */
-function fileToImage(file){
-  return new Promise((resolve,reject)=>{
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = reader.result;
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
+fileInput.addEventListener('change', async (ev) => {
+  const file = ev.target.files && ev.target.files[0];
+  result.textContent = '';
+  if (!file) return resetPreview();
 
-/** Compresión básica: redimensiona respetando relación hasta máx. 1600px (lado mayor) */
-async function compressImage(file, maxSide=1600, quality=0.8){
-  const img = await fileToImage(file);
-  const {naturalWidth:w, naturalHeight:h} = img;
-  let newW = w, newH = h;
+  // Verificación básica
+  if (!file.type.startsWith('image/')) { alert('Por favor selecciona una imagen.'); resetPreview(); return; }
 
-  if (Math.max(w,h) > maxSide){
-    const scale = maxSide / Math.max(w,h);
-    newW = Math.round(w * scale);
-    newH = Math.round(h * scale);
+  // Guarda referencia y muestra preview
+  currentFile = file;
+  showPreview(file);
+  uploadBtn.disabled = false;
+  info.textContent = `Tamaño: ${formatBytes(file.size)} · Tipo: ${file.type}`;
+});
+
+clearBtn.addEventListener('click', (ev) => { ev.preventDefault(); fileInput.value = ''; resetPreview(); });
+
+uploadBtn.addEventListener('click', async (ev) => {
+  ev.preventDefault();
+  if (!currentFile) return alert('No hay imagen para subir.');
+  uploadBtn.disabled = true;
+  progressWrap.style.display = '';
+  progress.value = 0;
+  result.textContent = '';
+
+  try {
+    // Opcional: reducir tamaño antes de subir (canvas) para ahorrar datos
+    const blobToSend = await resizeImageIfNeeded(currentFile, 1024, 0.8);
+
+    const form = new FormData();
+    // Nombre del archivo: usa el nombre ingresado si existe
+    const fileName = (nameInput.value || 'photo') + '.' + (blobToSend.type.split('/')[1] || 'jpg');
+    form.append('file', blobToSend, fileName);
+    form.append('filename', fileName);
+    form.append('originalName', currentFile.name);
+    form.append('size', String(blobToSend.size));
+
+    // Si Make espera JSON, puedes enviar también una versión en base64 (descomentar block si lo necesitas)
+    // const base64 = await blobToBase64(blobToSend);
+    // form.append('data_url', base64);
+
+    // Envío por fetch con progreso (usar XHR para ver progreso real)
+    await sendWithXhr(WEBHOOK_URL, form, (pct) => { progress.value = pct; });
+
+    result.style.color = 'green';
+    result.textContent = 'Envío completado correctamente.';
+  } catch (err) {
+    console.error(err);
+    result.style.color = 'crimson';
+    result.textContent = 'Error al subir: ' + (err.message || err);
+  } finally {
+    uploadBtn.disabled = false;
+    progressWrap.style.display = 'none';
   }
+});
 
-  const canvas = document.createElement('canvas');
-  canvas.width = newW; canvas.height = newH;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(img, 0, 0, newW, newH);
-
-  return new Promise(resolve=>{
-    canvas.toBlob(blob => resolve(blob), 'image/jpeg', quality);
-  });
+function resetPreview(){
+  currentFile = null;
+  preview.innerHTML = '<div class="muted">No hay imagen seleccionada</div>';
+  uploadBtn.disabled = true;
+  info.textContent = 'Tamaño: — · Tipo: —';
+  result.textContent = '';
 }
 
-/** Render de preview */
-function showPreview(objURL){
+function showPreview(file){
   preview.innerHTML = '';
   const img = document.createElement('img');
-  img.alt = 'Vista previa del ticket';
-  img.src = objURL;
+  img.alt = 'preview';
+  img.src = URL.createObjectURL(file);
   preview.appendChild(img);
+  // liberar URL cuando la imagen haya cargado
+  img.onload = () => URL.revokeObjectURL(img.src);
 }
 
-/** Estado UI */
-function setStatus(msg, type=''){
-  statusBox.textContent = msg;
-  statusBox.className = 'status ' + (type||'');
+function formatBytes(bytes, decimals = 2) {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['B','KB','MB','GB','TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
-/** Manejo de archivo */
-ticketInput.addEventListener('change', async (ev)=>{
-  const file = ev.target.files && ev.target.files[0];
-  if(!file){ return; }
-  originalFile = file;
-  setStatus('Procesando imagen… (compresión y vista previa)');
-  try{
-    compressedBlob = await compressImage(file, 1600, 0.8);
-    const objURL = URL.createObjectURL(compressedBlob);
-    showPreview(objURL);
-    sendBtn.disabled = false;
-    retakeBtn.disabled = false;
-    setStatus(`Listo para enviar. Tamaño comprimido: ${(compressedBlob.size/1024).toFixed(0)} KB`);
-  }catch(err){
-    console.error(err);
-    setStatus('No se pudo procesar la imagen. Intenta de nuevo.', 'err');
-  }
-});
+// Redimensiona imagen si supera maxWidth (mantiene proporción)
+async function resizeImageIfNeeded(file, maxWidth = 1024, quality = 0.8){
+  if (!file.type.startsWith('image/')) return file;
+  // Si ya es pequeña, no tocar
+  if (file.size < 300*1024) return file; // menos de ~300KB -> no comprimir
 
-/** Retomar: limpiar selección */
-retakeBtn.addEventListener('click', ()=>{
-  ticketInput.value = '';
-  originalFile = null;
-  compressedBlob = null;
-  preview.innerHTML = '<span class="hint">La vista previa aparecerá aquí</span>';
-  sendBtn.disabled = true;
-  retakeBtn.disabled = true;
-  setStatus('Esperando captura…');
-});
+  const img = await createImageBitmap(file);
+  const ratio = img.width / img.height;
+  const targetWidth = Math.min(img.width, maxWidth);
+  const targetHeight = Math.round(targetWidth / ratio);
 
-/** Envío a Make (multipart/form-data) */
-sendBtn.addEventListener('click', async ()=>{
-  if(!compressedBlob){ setStatus('No hay imagen para enviar.', 'warn'); return; }
+  const canvas = document.createElement('canvas');
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-  const store = el('#store').value.trim();
-  const cashier = el('#cashier').value.trim();
-  const notes = el('#notes').value.trim();
+  return await new Promise((res) => canvas.toBlob((blob) => {
+    // Si blob es null (rara vez), devuelvo original
+    if (!blob) return res(file);
+    res(blob);
+  }, 'image/jpeg', quality));
+}
 
-  setStatus('Enviando al Webhook de Make…');
-  sendBtn.disabled = true;
+function blobToBase64(blob){
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = () => res(reader.result);
+    reader.onerror = rej;
+    reader.readAsDataURL(blob);
+  });
+}
 
-  try{
-    const form = new FormData();
-    // Archivo comprimido:
-    const fileName = `ticket_${new Date().toISOString().replace(/[:.]/g,'-')}.jpg`;
-    form.append('ticket_image', compressedBlob, fileName);
+// Envío con XHR para poder reportar progreso
+function sendWithXhr(url, formData, onProgress){
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
 
-    // Metadatos útiles:
-    form.append('store', store);
-    form.append('cashier', cashier);
-    form.append('notes', notes);
-    form.append('client_ts', new Date().toISOString());
-    form.append('original_size_bytes', originalFile ? originalFile.size : 0);
-    form.append('compressed_size_bytes', compressedBlob.size);
+    xhr.upload.onprogress = function(e){
+      if (!e.lengthComputable) return;
+      const pct = Math.round((e.loaded / e.total) * 100);
+      if (typeof onProgress === 'function') onProgress(pct);
+    };
 
-    const res = await fetch(WEBHOOK_URL, { method:'POST', body: form });
-    if(!res.ok){
-      const t = await res.text().catch(()=> '');
-      throw new Error(`HTTP ${res.status} – ${t.slice(0,200)}`);
-    }
+    xhr.onload = function(){
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(xhr.responseText);
+      } else {
+        reject(new Error('Status ' + xhr.status + ': ' + xhr.responseText));
+      }
+    };
 
-    setStatus('✅ Enviado correctamente. Puedes capturar otro ticket.', 'ok');
-    // Limpieza suave para siguiente captura
-    ticketInput.value = '';
-    originalFile = null;
-    compressedBlob = null;
-    preview.innerHTML = '<span class="hint">La vista previa aparecerá aquí</span>';
-    sendBtn.disabled = true;
-    retakeBtn.disabled = true;
+    xhr.onerror = function(){ reject(new Error('Network error')); };
+    xhr.ontimeout = function(){ reject(new Error('Timeout')); };
 
-  }catch(err){
-    console.error(err);
-    setStatus('❌ Error al enviar: ' + err.message, 'err');
-    sendBtn.disabled = false;
-  }
-});
+    xhr.send(formData);
+  });
+}
+
+// Inicializar estado
+resetPreview();
 </script>
 </body>
 </html>
