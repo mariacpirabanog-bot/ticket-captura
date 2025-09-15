@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Captura de Tickets – Demo</title>
+<style>
+  :root { --bg:#0f1115; --fg:#eaeef5; --muted:#a9b2c3; --accent:#6ad3ff; --ok:#30d158; --warn:#ffd60a; --err:#ff453a; }
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,Segoe UI,Roboto,Arial}
+  .wrap{max-width:720px;margin:0 auto;padding:16px 20px 32px}
+  h1{font-size:1.25rem;margin:8px 0 2px}
+  p.sub{color:var(--muted);margin:0 0 16px}
+  .card{background:#151823;border:1px solid #1f2431;border-radius:12px;padding:16px;margin:12px 0}
+  label{display:block;margin:10px 0 6px;color:var(--muted)}
+  input,textarea,button,select{
+    width:100%;box-sizing:border-box;background:#0f121a;color:var(--fg);
+    border:1px solid #2a3040;border-radius:10px;padding:12px;outline:none
+  }
+  input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+  textarea{min-height:72px;resize:vertical}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .row > *{flex:1 1 200px}
+  .preview{
+    width:100%;aspect-ratio:3/4;background:#0b0e14;border:1px dashed #2a3040;border-radius:12px;
+    display:grid;place-items:center;overflow:hidden;margin-top:8px
+  }
+  .preview img{width:100%;height:100%;object-fit:cover}
+  .hint{font-size:.9rem;color:var(--muted)}
+  .status{margin-top:12px;padding:10px;border-radius:10px;border:1px solid #283044;background:#0d1220}
+  .status.ok{border-color:#234d2e;background:#0f1a12;color:var(--ok)}
+  .status.warn{border-color:#4d4623;background:#1a170f;color:var(--warn)}
+  .status.err{border-color:#4d2323;background:#1a0f0f;color:var(--err)}
+  .actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+  .btn{background:#1b2130;border:1px solid #2a3040;border-radius:10px;padding:12px 14px;cursor:pointer}
+  .btn.primary{background:linear-gradient(180deg,#1e2a40,#162036);border-color:#2a3040}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .small{font-size:.85rem;color:var(--muted)}
+  footer{margin-top:18px;color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Captura de Tickets</h1>
+  <p class="sub">Toma una foto, revisa la vista previa y envíala al Webhook de Make.</p>
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <label for="store">Caja / Punto</label>
+        <input id="store" placeholder="Caja 01" />
+      </div>
+      <div>
+        <label for="cashier">Cajero/a</label>
+        <input id="cashier" placeholder="Harvey" />
+      </div>
+    </div>
+
+    <label for="ticket">Foto del ticket</label>
+    <input id="ticket" type="file" accept="image/*" capture="environment" />
+    <div class="preview" id="preview">
+      <span class="hint">La vista previa aparecerá aquí</span>
+    </div>
+
+    <label for="notes">Notas (opcional)</label>
+    <textarea id="notes" placeholder="Luz baja, ticket arrugado, etc."></textarea>
+
+    <div class="hint small">Consejo: llena el encuadre, evita sombras duras y mantén el ticket plano.</div>
+
+    <div class="actions">
+      <button id="retake" class="btn" type="button" disabled>Retomar</button>
+      <button id="send" class="btn primary" type="button" disabled>Enviar a Make</button>
+    </div>
+
+    <div id="status" class="status">Esperando captura…</div>
+  </div>
+
+  <footer>
+    Este demo comprime la imagen a JPG y la envía como <strong>multipart/form-data</strong> al Webhook de Make.
+  </footer>
+</div>
+
+<script>
